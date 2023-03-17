@@ -1,4 +1,5 @@
 import 'package:clinic_flutter_p1/screens/edit_patient.dart';
+import 'package:clinic_flutter_p1/screens/home_screen.dart';
 import 'package:clinic_flutter_p1/theme.dart';
 import 'package:clinic_flutter_p1/widget/bmi_card.dart';
 import 'package:clinic_flutter_p1/widget/button_primary.dart';
@@ -7,6 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../widget/patient_details_card.dart';
 import '../widget/time_line.dart';
+import '../model/patient.dart';
+import '../services/patient_services.dart';
 
 class PatientDetails extends StatefulWidget {
   final String patientId;
@@ -19,30 +22,37 @@ class PatientDetails extends StatefulWidget {
 
 class _PatientDetailsState extends State<PatientDetails> {
   // initialize patient details with empty values
-  String _name = '';
-  int _age = 0;
-  String _gender = '';
-  String _address = '';
+  Patient patient = Patient.empty();
   final List<TimelineEvent> events = [
     TimelineEvent(time: "2022-01-01", action: "Add new test"),
     TimelineEvent(time: "2022-01-01", action: "Edit test"),
   ];
   // fetch patient details from the database using patientId
   Future<void> fetchPatientDetails() async {
-    // here you can write code to fetch patient details from the database using patientId
-    // for example, you can use a package like http to make an API request to the server
-    // and get the patient details as a JSON response
-    // then you can parse the JSON response and set the patient details in the state
-    // for simplicity, we'll just use hardcoded values here
+    print('patientId: ${widget.patientId}');
+    // add print statement
+    var _patient = await getPatientById(widget.patientId);
+    print('_patient: $_patient');
+    // assign the patient details to the patient variable
+    patient.id = _patient['_id'];
+    patient.age = _patient['age'];
+    patient.department = _patient['department'];
+    patient.firstName = _patient['firstName'];
+    patient.lastName = _patient['lastName'];
+    patient.phone = _patient['phone'];
+    patient.gender = _patient['gender'];
+    patient.address = _patient['address'];
+    patient.email = _patient['email'];
+    patient.height = double.tryParse(_patient['height'].toString()) ?? 0.0;
+    patient.weight = double.tryParse(_patient['weight'].toString()) ?? 0.0;
+    patient.doctor = _patient['doctor']['username'];
+    patient.status = _patient['status'];
 
-    // simulate network delay for 2 seconds
-    await Future.delayed(Duration(seconds: 2));
+    //convert to date
+    patient.birthDate = DateTime.parse(_patient['birthDate']);
 
     setState(() {
-      _name = 'John Doe';
-      _age = 30;
-      _gender = 'Male';
-      _address = '123 Main St, Anytown USA';
+      this.patient = patient;
     });
   }
 
@@ -54,8 +64,18 @@ class _PatientDetailsState extends State<PatientDetails> {
     fetchPatientDetails(); // fetch patient details when the widget is initialized
   }
 
+  Future<void> _deletePatient(String id) async {
+    await deletePatient(id);
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => HomeScreen()));
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (patient == null) {
+      return Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       backgroundColor: backgroundColorGrey,
       body: Column(
@@ -87,7 +107,7 @@ class _PatientDetailsState extends State<PatientDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Patient Name',
+                  patient.firstName ?? '',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
                 ElevatedButton(
@@ -106,11 +126,11 @@ class _PatientDetailsState extends State<PatientDetails> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Emergency',
+                  patient.department ?? '',
                   style: TextStyle(fontSize: 16, color: greyColor),
                 ),
                 Text(
-                  'Tyler',
+                  patient.doctor ?? '',
                   style: TextStyle(fontSize: 16),
                 ),
               ],
@@ -178,22 +198,27 @@ class _PatientDetailsState extends State<PatientDetails> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               PatientDetailsCard(
-                name: 'John Doe',
-                age: 30,
-                gender: 'Male',
-                dateOfBirth: '01/01/1991',
-                phone: '555-555-5555',
-                email: 'johndoe@example.com',
-                address: '123 Main St, Anytown USA',
+                name: patient.firstName ?? '' + ' ',
+                age: patient.age ?? 0,
+                gender: patient.gender ?? '',
+                dateOfBirth:
+                    patient.birthDate.toString().substring(0, 10) ?? '',
+                phone: patient.phone.toString() ?? '',
+                email: patient.email ?? '',
+                address: patient.address ?? '',
               ),
-              BmiCard(bmiValue: 25.0, heightValue: 170.0, weightValue: 70.0),
+              BmiCard(
+                  bmiValue: 25.0,
+                  heightValue: double.parse(patient.height.toString()),
+                  weightValue: double.parse(patient.weight.toString())),
               ButtonPrimary(
                   text: 'Update Patient',
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => EditPatientScreen()),
+                          builder: (context) =>
+                              EditPatientScreen(patient: patient)),
                     );
                   }),
               SizedBox(height: 16),
@@ -201,6 +226,7 @@ class _PatientDetailsState extends State<PatientDetails> {
                   text: 'Delete',
                   onTap: () {
                     // navigate to edit patient screen
+                    _deletePatient(widget.patientId);
                   },
                   color: Colors.red),
             ],

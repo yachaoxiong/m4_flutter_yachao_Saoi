@@ -1,6 +1,8 @@
 import 'package:clinic_flutter_p1/screens/home_screen.dart';
 import 'package:clinic_flutter_p1/widget/app_input.dart';
 import 'package:flutter/material.dart';
+import '../services/patient_services.dart';
+import '../model/patient.dart';
 
 class AddNew extends StatefulWidget {
   const AddNew({Key? key}) : super(key: key);
@@ -22,6 +24,58 @@ class _AddNewState extends State<AddNew> {
   TextEditingController _heightController = TextEditingController();
   TextEditingController _weightController = TextEditingController();
   bool _showCard = false;
+
+  void _submitForm() async {
+    // get data from controllers
+    String firstName = _firstNameController.text;
+    String lastName = _lastNameController.text;
+    int age = int.tryParse(_ageController.text) ?? 0;
+    String gender = _genderController.text;
+    String dob = _dobController.text;
+    String department = _departmentController.text;
+    String email = _emailController.text;
+    String phone = _phoneController.text;
+    String address = _addressController.text;
+    double height = double.tryParse(_heightController.text) ?? 0.0;
+    double weight = double.tryParse(_weightController.text) ?? 0.0;
+    print('firstName: $firstName');
+    print('lastName: $lastName');
+    print('age: $age');
+    print('dob: $dob');
+    print('department: $department');
+    print('email: $email');
+    print('phone: $phone');
+    print('address: $address');
+    print('height: $height');
+    print('weight: $weight');
+
+    // create patient object
+    Patient patient = Patient(
+      id: '',
+      firstName: firstName,
+      lastName: lastName,
+      age: age,
+      gender: gender,
+      birthDate: DateTime.parse(dob),
+      department: department,
+      email: email,
+      phone: phone,
+      address: address,
+      height: height,
+      weight: weight,
+    );
+
+    // convert patient object to json
+    print('patient:function: ');
+    // submit patient to service
+    await addPatient(patient);
+
+    // navigate back to home screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => HomeScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -156,10 +210,7 @@ class _AddNewState extends State<AddNew> {
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => HomeScreen()),
-                  );
+                  _submitForm();
                 },
                 child: Text('Submit'),
               ),
