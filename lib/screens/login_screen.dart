@@ -71,51 +71,53 @@ class _LoginScreenState extends State<LoginScreen> {
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           margin: const EdgeInsets.only(bottom: 40),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Login',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Image.asset(
-                'assets/register.png',
-                width: 300,
-                height: 300,
-              ),
-              AppInput(
-                hintText: 'Username',
-                controller: _usernameController,
-              ),
-              AppInput(
-                hintText: 'Password',
-                isPassword: true,
-                controller: _passwordController,
-              ),
-              if (_errorMessage != null)
-                Text(
-                  _errorMessage!,
-                  style: const TextStyle(
-                    color: Colors.red,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  'Login',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-              ButtonPrimary(
-                text: _isLoading ? 'Logging in...' : 'Login',
-                onTap: _isLoading ? null : _login,
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => RegisterScreen()),
-                  );
-                },
-                child: const Text('Don\'t have an account? Register'),
-              ),
-            ],
+                Image.asset(
+                  'assets/register.png',
+                  width: 300,
+                  height: 300,
+                ),
+                AppInput(
+                  hintText: 'Username',
+                  controller: _usernameController,
+                ),
+                AppInput(
+                  hintText: 'Password',
+                  isPassword: true,
+                  controller: _passwordController,
+                ),
+                if (_errorMessage != null)
+                  Text(
+                    _errorMessage!,
+                    style: const TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                ButtonPrimary(
+                  text: _isLoading ? 'Logging in...' : 'Login',
+                  onTap: _isLoading ? null : _login,
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegisterScreen()),
+                    );
+                  },
+                  child: const Text('Don\'t have an account? Register'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

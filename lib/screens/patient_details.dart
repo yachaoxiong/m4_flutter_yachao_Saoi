@@ -10,6 +10,7 @@ import '../widget/patient_details_card.dart';
 import '../widget/time_line.dart';
 import '../model/patient.dart';
 import '../services/patient_services.dart';
+import '../widget/add_record.dart';
 
 class PatientDetails extends StatefulWidget {
   final String patientId;
@@ -23,10 +24,16 @@ class PatientDetails extends StatefulWidget {
 class _PatientDetailsState extends State<PatientDetails> {
   // initialize patient details with empty values
   Patient patient = Patient.empty();
-  final List<TimelineEvent> events = [
-    TimelineEvent(time: "2022-01-01", action: "Add new test"),
-    TimelineEvent(time: "2022-01-01", action: "Edit test"),
-  ];
+  List<dynamic> tests = [];
+  List<dynamic> histories = [];
+
+  // fetch patient details, tests and histories from the database using patientId
+  Future<void> fetchPatientDetailsTestsAndHistories() async {
+    await fetchPatientDetails();
+    await fetchPatientTests();
+    await fetchPatientHistories();
+  }
+
   // fetch patient details from the database using patientId
   Future<void> fetchPatientDetails() async {
     print('patientId: ${widget.patientId}');
@@ -56,12 +63,26 @@ class _PatientDetailsState extends State<PatientDetails> {
     });
   }
 
+  Future<void> fetchPatientTests() async {
+    tests = await getPatientTests(widget.patientId);
+    setState(() {
+      this.tests = tests;
+    });
+  }
+
+  Future<void> fetchPatientHistories() async {
+    histories = await getPatientHistories(widget.patientId);
+    setState(() {
+      this.histories = histories;
+    });
+  }
+
   String _selectedTab = 'Info';
 
   @override
   void initState() {
     super.initState();
-    fetchPatientDetails(); // fetch patient details when the widget is initialized
+    fetchPatientDetailsTestsAndHistories(); // fetch patient details when the widget is initialized
   }
 
   Future<void> _deletePatient(String id) async {
@@ -112,7 +133,19 @@ class _PatientDetailsState extends State<PatientDetails> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // handle add drug button press
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AddRecordModal(
+                          patientId: widget.patientId,
+                          onRecordAdded: () {
+                            // Refresh the test and history data when a new test is added.
+                            fetchPatientTests();
+                            fetchPatientHistories();
+                          },
+                        );
+                      },
+                    );
                   },
                   child: Text('Add Record'),
                 ),
@@ -153,7 +186,6 @@ class _PatientDetailsState extends State<PatientDetails> {
               ],
             ),
           ),
-          SizedBox(height: 12),
 
           Expanded(
             // show it
@@ -233,22 +265,38 @@ class _PatientDetailsState extends State<PatientDetails> {
           ),
         );
       case 'Records':
-        return SingleChildScrollView(
-            child: Column(
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            TestResultCard(
-              icon: Icons.accessibility,
-              type: "Blood Pressure(X/Y MMHG",
-              value: "121/90",
-              dateCreated: "2022-01-02",
-              testType: "Blood Pressure(X/Y MMHG)",
-              testStatus: "Normal",
+            Expanded(
+              child: ListView.builder(
+                itemCount: tests.length,
+                itemBuilder: (context, index) {
+                  var test = tests[index];
+                  return TestResultCard(
+                    icon: Icons.accessibility,
+                    type: test['category'],
+                    value: test['reading'],
+                    dateCreated: test['createdAt'].substring(0, 10),
+                    testType: test['category'],
+                    testStatus: test['isCritical'] ? "Critical" : "Normal",
+                  );
+                },
+              ),
             ),
           ],
-        ));
+        );
       case 'History':
         return TimelineWidget(
-            events: events, dotColor: Colors.blue, dotSize: 16);
+          events: histories.map((history) {
+            return TimelineEvent(
+              time: history['createdAt'].substring(0, 10),
+              action: history['description'],
+            );
+          }).toList(),
+          dotColor: Colors.blue,
+          dotSize: 16,
+        );
       default:
         return Container();
     }

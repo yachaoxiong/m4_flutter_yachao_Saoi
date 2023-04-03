@@ -79,72 +79,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: SafeArea(
         child: Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // title
-              Text(
-                'Register',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              //image
-              Image.asset(
-                'assets/register.png',
-                width: 300,
-                height: 300,
-              ),
-              // username
-              AppInput(
-                hintText: 'Username',
-                controller: _usernameController,
-              ),
-              // email
-              AppInput(
-                hintText: 'Email',
-                controller: _emailController,
-              ),
-              // password
-              AppInput(
-                hintText: 'Password',
-                isPassword: true,
-                controller: _passwordController,
-              ),
-              // confirm password
-              AppInput(
-                hintText: 'Confirm Password',
-                isPassword: true,
-                controller: _confirmPasswordController,
-              ),
-              if (_errorMessage.isNotEmpty)
-                Text(
-                  _errorMessage,
-                  style: TextStyle(
-                    color: Colors.red,
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // title
+                  Text(
+                    'Register',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              // button
-              ButtonPrimary(
-                text: 'Register',
-                onTap: _register,
+                  //image
+                  Image.asset(
+                    'assets/register.png',
+                    width: 300,
+                    height: 300,
+                  ),
+                  // username
+                  AppInput(
+                    hintText: 'Username',
+                    controller: _usernameController,
+                  ),
+                  // email
+                  AppInput(
+                    hintText: 'Email',
+                    controller: _emailController,
+                  ),
+                  // password
+                  AppInput(
+                    hintText: 'Password',
+                    isPassword: true,
+                    controller: _passwordController,
+                  ),
+                  // confirm password
+                  AppInput(
+                    hintText: 'Confirm Password',
+                    isPassword: true,
+                    controller: _confirmPasswordController,
+                  ),
+                  if (_errorMessage.isNotEmpty)
+                    Text(
+                      _errorMessage,
+                      style: TextStyle(
+                        color: Colors.red,
+                      ),
+                    ),
+                  // button
+                  ButtonPrimary(
+                    text: 'Register',
+                    onTap: _register,
+                  ),
+                  // back to login text button
+                  TextButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()),
+                      );
+                    },
+                    child: Text('Back to Login'),
+                  ),
+                ],
               ),
-              // back to login text button
-              TextButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => LoginScreen()),
-                  );
-                },
-                child: Text('Back to Login'),
-              ),
-            ],
-          ),
-        ),
+            )),
       ),
     );
   }

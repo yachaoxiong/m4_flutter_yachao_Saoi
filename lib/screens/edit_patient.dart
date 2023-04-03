@@ -24,6 +24,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
   TextEditingController _addressController = TextEditingController();
   TextEditingController _heightController = TextEditingController();
   TextEditingController _weightController = TextEditingController();
+  TextEditingController _statusController = TextEditingController();
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
     _addressController.text = widget.patient.address.toString();
     _heightController.text = widget.patient.height.toString();
     _weightController.text = widget.patient.weight.toString();
+    _statusController.text = widget.patient.status.toString();
   }
 
   void _submitForm() async {
@@ -177,6 +179,38 @@ class _EditPatientScreenState extends State<EditPatientScreen> {
               AppInput(
                 controller: _weightController,
                 hintText: 'Weight',
+              ),
+              SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: _statusController.text,
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _statusController.text = newValue!;
+                  });
+                },
+                items: <String>['critical', 'normal']
+                    .map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: "Status",
+                  hintText: "Select Patient Status",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                      color: Theme.of(context).primaryColor,
+                      width: 2,
+                    ),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                ),
               ),
               SizedBox(height: 32),
               Center(
